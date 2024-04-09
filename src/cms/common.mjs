@@ -168,7 +168,6 @@ export const blocks = {
   label_singular: t("block"),
   required: false,
   widget: "list",
-
   collapsed: true,
   types: [
     {
@@ -456,7 +455,6 @@ export const blocks = {
         },
       ],
     },
-
     {
       name: "rich_text",
       label: t("richtext"),
@@ -711,7 +709,6 @@ export const blocks = {
         },
       ],
     },
-
     {
       name: "popup",
       label: t("annoying_popup"),
@@ -1050,7 +1047,6 @@ export const blocks = {
             },
           ],
         },
-
         {
           name: "items",
           label: t("items"),
@@ -1083,6 +1079,61 @@ export const blocks = {
           label: "Id",
           widget: "uuid",
           allow_regenerate: false,
+        },
+      ],
+    },
+    {
+      name: "order_form",
+      label: t("order_form"),
+      widget: "object",
+      collapsed: true,
+      summary: "{{title}}",
+      fields: [
+        {
+          label: "Component",
+          name: "component",
+          widget: "hidden",
+          default: "OrderForm",
+        },
+        {
+          name: "title",
+          label: t("title"),
+          widget: "string",
+          default: t("order_form"),
+        },
+        {
+          label: t("style"),
+          name: "style",
+          widget: "object",
+          collapsed: true,
+          fields: [
+            {
+              name: "container",
+              label: t("container_size"),
+              widget: "select",
+              options: ["sm", "md", "lg", "xl", "full", "none"],
+              default: "md",
+            },
+            {
+              name: "surface",
+              label: t("surface"),
+              multiple: false,
+              widget: "relation",
+              collection: "config",
+              file: "style",
+              search_fields: ["surface.*.name"],
+              display_fields: ["surface.*.name"],
+              value_field: "surface.*.class",
+              options_length: 50,
+              required: false,
+            },
+            {
+              label: t("block_class"),
+              name: "block_class",
+              widget: "string",
+              required: false,
+            },
+          ],
         },
       ],
     },
