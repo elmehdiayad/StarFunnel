@@ -8,6 +8,7 @@ import Features from "./Features.astro";
 import AnnoyingPopup from "./AnnoyingPopup.astro";
 import PricingTable from "./PricingTable.astro";
 import Faqs from "./Faqs.astro";
+import OrderForm from "./OrderForm.astro";
 
 const { slot, ...props } = Astro.props;
 ---
@@ -19,6 +20,7 @@ const { slot, ...props } = Astro.props;
       className={` ${props?.style?.surface || ""} ${
         props?.style?.block_class ? props.style.block_class : "py-8 sm:py-20"
       }`}
+      noSsr={false}
     >
       {props.component === "ImageGallery" && <ImageGallery {...props} />}
       {props.component === "TextMedia" && <TextMedia {...props} />}
@@ -27,6 +29,7 @@ const { slot, ...props } = Astro.props;
       {props.component === "Features" && <Features {...props} />}
       {props.component === "PricingTable" && <PricingTable {...props} />}
       {props.component === "Faq" && <Faqs {...props} />}
+      {props.component === "OrderForm" && <OrderForm {...props} />}
     </Intersecting>
   )
 }

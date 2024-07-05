@@ -19,7 +19,10 @@ const config = {
   logo_url: "https://starfunnel.unfolding.io/logo.svg",
   local_backend: true,
   backend: {
-    name: "test-repo",
+    name: "github",
+    repo: "elmehdiayad/StarFunnel", // Path to your GitHub repository
+    // optional, defaults to main
+    branch: "master",
   },
   search: true,
   media_folder: "src/assets",
