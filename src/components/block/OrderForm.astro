@@ -1,16 +1,18 @@
 ---
 import Order from "@components/form/Order.vue";
 const { title, style, id } = Astro.props;
----
 
-<div class={`container-${style.container} grid `}>
+const pricesByCountry = {
+  US: { originalPrice: "$2500", discountedPrice: "$2000" },
+  FR: { originalPrice: "$2600", discountedPrice: "$2100" },
+  MA: { originalPrice: "$999", discountedPrice: "$2100" },
+  SP: { originalPrice: "$2111", discountedPrice: "$2100" },
+};
+---
+<div class={`container-${style.container} grid`}>
   <h2 class="title-sm fade-in">{title}</h2>
 
-  <div
-    class={`accordion relative py-5 surface-base-overlay fade-up`}
-    id={id}
-    itemtype="https://schema.org/FAQPage"
-  >
-    <Order client:visible />
+  <div id={id} class="py-2">
+    <Order client:visible pricesByCountry={pricesByCountry} />
   </div>
 </div>

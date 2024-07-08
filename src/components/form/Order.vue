@@ -1,23 +1,21 @@
 <template>
-  <form @submit.prevent="submit" class="grid gap-4">
-    <div class="input-group">
-      <input type="text" name="name" placeholder=" " class="peer" v-model="form.name" />
-      <label
-        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">
-        {{ t("name") }} *
-      </label>
+  <div class="flex flex-wrap items-end gap-2">
+    <!-- Strikethrough Price -->
+    <div class="title-xs text-gray-500 line-through">
+      {{ prices.originalPrice }}
     </div>
-    <div class="input-group">
-      <input type="email" name="email" placeholder=" " class="peer" v-model="form.email" />
-      <label
-        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">{{
-          t("email") }} *</label>
+    <!-- Current Price -->
+    <div class="title-xs font-bold text-red-500">
+      {{ prices.discountedPrice }}
     </div>
+  </div>
+  <form @submit.prevent="submit" class="grid gap-4 mt-3">
     <div class="input-group">
-      <vue-tel-input v-model="form.phone"  class="mt-2"></vue-tel-input>
-      <label
-        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">{{
-          t("phone") }} *</label>
+      <input type="text" name="name" placeholder="Name" v-model="form.name" />
+    </div>
+
+    <div class="input-group">
+      <vue-tel-input v-model="form.phone"></vue-tel-input>
     </div>
     <div class="pointer-events-none sticky bottom-0 right-5 flex justify-end md:translate-y-10">
       <button class="btn surface-primary group pointer-events-auto mb-auto ml-auto" type="submit"
@@ -45,7 +43,7 @@
   </form>
 </template>
 <script setup>
-import { ref, watch, reactive, computed } from "vue";
+import { ref, watch, reactive, computed, onMounted } from "vue";
 import { t } from "@util/translate";
 import { useStore } from "@nanostores/vue";
 import { showDialog } from "@src/store";
@@ -54,16 +52,16 @@ import Loading from "@components/common/Loading.vue";
 import "vue3-toastify/dist/index.css";
 import { toast } from "vue3-toastify";
 
+const props = defineProps({
+  pricesByCountry: Object
+});
 
-const form = reactive({ email: "", name: "", phone: ""});
+
+
+
+const form = reactive({ name: "", phone: "" });
 
 const rules = {
-  email: [
-    {
-      type: "email",
-      required: true,
-    },
-  ],
   name: [
     {
       type: "string",
@@ -123,18 +121,50 @@ const submit = () => {
       loading.value = false;
     });
 };
+
+const userCountry = ref(null);
+const prices = ref({ originalPrice: "1000$", discountedPrice: "999$" });
+async function fetchUserCountry() {
+  try {
+    const response = await fetch("https://ipinfo.io/json");
+    if (!response.ok) throw new Error("Failed to fetch country information");
+    const data = await response.json();
+    userCountry.value = data.country;
+    // // get country from query params country 
+    // const urlParams = new URLSearchParams(window.location.search);
+    // userCountry.value = urlParams.get('country') || "USA";
+  } catch (error) {
+    console.error("Error fetching user country:", error);
+    userCountry.value = "USA"; // Default to USA on error
+  }
+}
+onMounted(() => {
+  fetchUserCountry();
+});
+watch(userCountry, (newCountry) => {
+  prices.value = props.pricesByCountry[newCountry.toUpperCase()] || props.pricesByCountry["USA"]; // Default to USA prices if country not found
+});
 </script>
 
 <style lang="postcss" scoped>
 .input-group {
   @apply relative isolate;
 
-  input .select {
-    @apply block w-full appearance-none border-0 border-b border-gray-500 bg-transparent px-0 py-2.5 text-sm text-current focus:border-primary focus:outline-none focus:ring-0;
+  vue-tel-input,
+  input,
+  .select {
+    @apply block w-full appearance-none border border-gray-400 bg-transparent px-2 py-2.5 text-sm text-current focus:border-primary focus:outline-none focus:ring-0;
   }
 
-  label {
-    @apply pointer-events-none absolute left-0 top-3 z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-current duration-300;
+  .vue-tel-input {
+    @apply border-gray-400;
+    border-radius: 0 !important;
   }
+
+  .vue-tel-input:focus-within {
+    @apply border-primary;
+    box-shadow: unset !important;
+  }
+
 }
 </style>
