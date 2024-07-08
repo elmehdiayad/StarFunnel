@@ -1,16 +1,12 @@
 <template>
   <form @submit.prevent="submit" class="grid gap-4">
-    <div class="pb-8">
-      <h2 class="subtitle">{{ contact?.title }}</h2>
-      <slot name="text" />
-    </div>
     <div class="input-group">
       <input type="text" name="name" placeholder=" " class="peer" v-model="form.name" />
       <label
-        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">{{
-          t("name") }} *</label>
+        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">
+        {{ t("name") }} *
+      </label>
     </div>
-
     <div class="input-group">
       <input type="email" name="email" placeholder=" " class="peer" v-model="form.email" />
       <label
@@ -18,23 +14,16 @@
           t("email") }} *</label>
     </div>
     <div class="input-group">
-      <input type="text" name="phone" placeholder=" " class="peer" v-model="form.phone" />
+      <vue-tel-input v-model="form.phone"  class="mt-2"></vue-tel-input>
       <label
         class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">{{
-          t("phone") }}</label>
-    </div>
-    <div class="input-group">
-      <textarea class="hide-scrollbar peer" name="message" id="" placeholder=" " cols="30" rows="2" ref="textarea"
-        v-model="input"></textarea>
-      <label
-        class="peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary">
-        {{ t("message") }} *</label>
+          t("phone") }} *</label>
     </div>
     <div class="pointer-events-none sticky bottom-0 right-5 flex justify-end md:translate-y-10">
       <button class="btn surface-primary group pointer-events-auto mb-auto ml-auto" type="submit"
         :disabled="!canSubmit">
         <span>
-          {{ t("submit") }}
+          {{ t("order") }}
         </span>
         <svg class="-mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
           xml:space="preserve" style="enable-background: new 0 0 12 12" viewBox="0 0 12 12">
@@ -55,29 +44,18 @@
     <Loading :loading="loading" />
   </form>
 </template>
-
 <script setup>
 import { ref, watch, reactive, computed } from "vue";
 import { t } from "@util/translate";
 import { useStore } from "@nanostores/vue";
 import { showDialog } from "@src/store";
 import { useAsyncValidator } from "@vueuse/integrations/useAsyncValidator";
-import { useTextareaAutosize } from "@vueuse/core";
 import Loading from "@components/common/Loading.vue";
 import "vue3-toastify/dist/index.css";
 import { toast } from "vue3-toastify";
 
-import Popper from "vue3-popper";
 
-const props = defineProps({
-  contact: {
-    type: Object,
-  },
-});
-
-const $showDialog = useStore(showDialog);
-const form = reactive({ email: "", name: "", message: "", phone: "" });
-const { textarea, input } = useTextareaAutosize();
+const form = reactive({ email: "", name: "", phone: ""});
 
 const rules = {
   email: [
@@ -92,27 +70,18 @@ const rules = {
       required: true,
     },
   ],
-  message: [
+  phone: [
     {
       type: "string",
-      min: 10,
       required: true,
     },
   ],
 };
+
 const { pass, isFinished, errorFields } = useAsyncValidator(form, rules);
 
-const showPopper = ref(false);
 const loading = ref(false);
 
-
-const hide = () => {
-  showDialog.set({
-    type: $showDialog.value.type,
-    slug: $showDialog.value.slug,
-    show: false,
-  });
-};
 
 
 
@@ -120,68 +89,47 @@ const canSubmit = computed(() => {
   return !loading.value && isFinished.value && pass.value;
 });
 
-const mailData = computed(() => {
+const testData = computed(() => {
   return {
     email: form.email,
     name: form.name,
-    message: `
-Name: ${form.name}\r\n
-Phone: ${form.phone}\r\n
-Email: ${form.email}\r\n
-Message: ${form.message}\r\n            `,
-  };
+    phone: form.phone,
+  }
 });
 
 const submit = () => {
   loading.value = true;
-
-  if (!!props.contact.provider) {
-    fetch(`/api/contact-${props.contact.provider}`, {
-      method: "POST",
-      body: JSON.stringify(mailData.value),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.status === "ok") {
-          toast.success(t("contact_thanks"));
-          form.email = "";
-          form.name = "";
-          form.phone = "";
-          form.message = "";
-          input.value = "";
-          hide();
-        } else {
-          toast.error(t("contact_error"));
-        }
-      })
-      .catch((e) => {
-        console.log("error", e);
+  fetch(`/api/order/sheet`, {
+    method: "POST",
+    body: JSON.stringify(testData.value),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.status === "ok") {
+        toast.success(t("contact_thanks"));
+        form.email = "";
+        form.name = "";
+        form.phone = "";
+      } else {
         toast.error(t("contact_error"));
-      })
-      .finally(() => {
-        loading.value = false;
-      });
-  }
+      }
+    })
+    .catch((e) => {
+      console.log("error", e);
+      toast.error(t("contact_error"));
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 };
-
-watch(
-  input,
-
-  (val) => {
-    form.message = val;
-  },
-  { immediate: false },
-);
 </script>
 
 <style lang="postcss" scoped>
 .input-group {
   @apply relative isolate;
 
-  input,
-  textarea,
-  .select {
+  input .select {
     @apply block w-full appearance-none border-0 border-b border-gray-500 bg-transparent px-0 py-2.5 text-sm text-current focus:border-primary focus:outline-none focus:ring-0;
   }
 

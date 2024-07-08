@@ -19,6 +19,7 @@ pnpm-debug.log
 .env.production
 .vscode/
 .netlify/
-
+africastyle.json
 # macOS-specific files
 .DS_Store
+credentials.json

@@ -88,11 +88,18 @@ export const toolbarButtonsInline = {
     "ordered-list",
     "decrease-indent",
     "increase-indent",
+    "shortcode",
     {
-      label: t("insert"),
+      label: "Insert",
       groups: [
         {
           items: ["blockquote", "code-block"],
+        },
+        {
+          items: ["insert-table"],
+        },
+        {
+          items: ["image", "file-link"],
         },
       ],
     },
