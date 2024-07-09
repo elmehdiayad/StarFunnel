@@ -16,7 +16,7 @@
     <div class="input-group">
       <!-- <vue-tel-input v-model="form.phone"></vue-tel-input> -->
       <input type="number" name="phone" placeholder="Numéro de téléphone 📞" v-model="form.phone" required
-        pattern="\d{3}-\d{3}-\d{4}" />
+        pattern="[\d\+]{5,15}" />
     </div>
     <button
       class="w-full h-10 d-flex items-center justify-center  surface-primary group pointer-events-auto rouder-none btn"
@@ -73,6 +73,7 @@ const rules = {
   phone: [
     {
       type: "string",
+      pattern: /^[\d\+]{5,15}$/,
       required: true,
       message: "please enter phone number",
     },
