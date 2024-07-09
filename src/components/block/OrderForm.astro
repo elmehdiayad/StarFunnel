@@ -10,9 +10,11 @@ const pricesByCountry = {
   GB: { originalPrice: "$3333", discountedPrice: "$2100" },
 };
 ---
-<div class={`container-${style.container} grid`}>
-  <h2 class="title-sm fade-in">{title}</h2>
 
+<div
+  class={`container-${style.container} grid border border-dashed border-red-500 p-8 shadow-md rounded`}
+>
+  <h2 class="title-sm fade-in">{title}</h2>
   <div id={id} class="py-2">
     <Order client:visible pricesByCountry={pricesByCountry} />
   </div>
