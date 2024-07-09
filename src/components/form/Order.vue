@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-wrap items-end gap-2">
+  <div class="flex flex-wrap items-end gap-2 h-8">
     <!-- Strikethrough Price -->
     <div class="title-xs text-gray-500 line-through">
       {{ prices.originalPrice }}
@@ -13,9 +13,10 @@
     <div class="input-group">
       <input type="text" name="name" placeholder="Name" v-model="form.name" />
     </div>
-
     <div class="input-group">
-      <vue-tel-input v-model="form.phone"></vue-tel-input>
+      <!-- <vue-tel-input v-model="form.phone"></vue-tel-input> -->
+      <input type="text" name="phone" placeholder="Phone" v-model="form.phone" />
+
     </div>
     <div class="pointer-events-none sticky bottom-0 right-5 flex justify-end md:translate-y-10">
       <button class="btn surface-primary group pointer-events-auto mb-auto ml-auto" type="submit"
@@ -57,6 +58,7 @@ const props = defineProps({
 });
 
 
+const userCountry = ref(null);
 
 
 const form = reactive({ name: "", phone: "" });
@@ -66,12 +68,14 @@ const rules = {
     {
       type: "string",
       required: true,
+      message: "please enter full name",
     },
   ],
   phone: [
     {
       type: "string",
       required: true,
+      message: "please enter phone number",
     },
   ],
 };
@@ -80,18 +84,15 @@ const { pass, isFinished, errorFields } = useAsyncValidator(form, rules);
 
 const loading = ref(false);
 
-
-
-
 const canSubmit = computed(() => {
   return !loading.value && isFinished.value && pass.value;
 });
 
-const testData = computed(() => {
+const clientData = computed(() => {
   return {
-    email: form.email,
     name: form.name,
     phone: form.phone,
+    country: userCountry.value,
   }
 });
 
@@ -99,16 +100,16 @@ const submit = () => {
   loading.value = true;
   fetch(`/api/order/sheet`, {
     method: "POST",
-    body: JSON.stringify(testData.value),
+    body: JSON.stringify(clientData.value),
     headers: { "Content-Type": "application/json" },
   })
     .then((r) => r.json())
     .then((data) => {
       if (data.status === "ok") {
         toast.success(t("contact_thanks"));
-        form.email = "";
         form.name = "";
         form.phone = "";
+
       } else {
         toast.error(t("contact_error"));
       }
@@ -120,19 +121,24 @@ const submit = () => {
     .finally(() => {
       loading.value = false;
     });
+
 };
 
-const userCountry = ref(null);
-const prices = ref({ originalPrice: "1000$", discountedPrice: "999$" });
+
+
+const prices = ref({ originalPrice: "", discountedPrice: "" });
 async function fetchUserCountry() {
   try {
-    const response = await fetch("https://ipinfo.io/json");
+    const response = await fetch("https://ip2c.org/s");
     if (!response.ok) throw new Error("Failed to fetch country information");
-    const data = await response.json();
-    userCountry.value = data.country;
-    // // get country from query params country 
-    // const urlParams = new URLSearchParams(window.location.search);
-    // userCountry.value = urlParams.get('country') || "USA";
+    const data = await response.text();
+    const parts = data.split(';');
+    if (parts[0] === '1') {
+      const countryCode = parts[1]; // This is the ISO two-letter country code
+      userCountry.value = countryCode;
+    } else {
+      throw new Error('Invalid response format');
+    }
   } catch (error) {
     console.error("Error fetching user country:", error);
     userCountry.value = "USA"; // Default to USA on error
@@ -150,21 +156,22 @@ watch(userCountry, (newCountry) => {
 .input-group {
   @apply relative isolate;
 
-  vue-tel-input,
   input,
   .select {
     @apply block w-full appearance-none border border-gray-400 bg-transparent px-2 py-2.5 text-sm text-current focus:border-primary focus:outline-none focus:ring-0;
   }
 
-  .vue-tel-input {
-    @apply border-gray-400;
-    border-radius: 0 !important;
+
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
-  .vue-tel-input:focus-within {
-    @apply border-primary;
-    box-shadow: unset !important;
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
   }
-
 }
 </style>

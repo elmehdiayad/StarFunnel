@@ -11,7 +11,7 @@ const credentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON || '{}');
 
 export const POST: APIRoute = async ({ request }) => {
 
-  const { email, name, phone, quantity } = await request.json();
+  const { name, phone, country } = await request.json();
 
   // After sending the email, append data to Google Sheet
   try {
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
       valueInputOption: 'USER_ENTERED',
       requestBody: { // Use `requestBody` instead of `resource`
         values: [
-          [new Date().toISOString(), name, email, phone, quantity],
+          [new Date().toISOString(), name, phone, country],
         ],
       },
     });

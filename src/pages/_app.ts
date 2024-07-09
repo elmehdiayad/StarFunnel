@@ -8,7 +8,7 @@ export default (app: App) => {
 
   const vueTelInputOptions = {
     mode: 'auto',
-    autoDefaultCountry: true,
+    autoDefaultCountry: true
   };
 
   app.component("Popper", Popper);
