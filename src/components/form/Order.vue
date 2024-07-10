@@ -1,13 +1,14 @@
 <template>
   <div class="flex flex-wrap items-end gap-2 h-8">
-    <!-- Strikethrough Price -->
-    <div class="title-xs text-gray-500 line-through">
-      {{ prices.originalPrice }}
-    </div>
     <!-- Current Price -->
     <div class="title-xs font-bold text-red-500">
       {{ prices.discountedPrice }}
     </div>
+    <!-- Strikethrough Price -->
+    <div class="title-xs text-gray-500 line-through">
+      {{ prices.originalPrice }}
+    </div>
+
   </div>
   <form @submit.prevent="submit" class="grid gap-4 mt-3">
     <div class="input-group">
